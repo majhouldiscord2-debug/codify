@@ -12,6 +12,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <script src="src/SFXManager_Vanilla.js"></script>
     <style>
         /* Replit Dark Pro Aesthetic */
         :root {
@@ -133,30 +134,30 @@
         </div>
 
         <div class="px-3 mb-4">
-            <button onclick="openNewProjectModal()" class="w-full py-2 bg-[#24272E] border border-base rounded-lg text-sm font-medium flex items-center justify-center hover:bg-[#2D3139] transition-colors">
+            <button onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click'); openNewProjectModal()" class="w-full py-2 bg-[#24272E] border border-base rounded-lg text-sm font-medium flex items-center justify-center hover:bg-[#2D3139] transition-colors">
                 <i class="fas fa-plus mr-2 text-xs"></i>
                 Create something new
             </button>
-            <button class="w-full mt-2 py-2 text-sm font-medium flex items-center justify-center hover:bg-[#24272E] rounded-lg transition-colors">
+            <button onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="w-full mt-2 py-2 text-sm font-medium flex items-center justify-center hover:bg-[#24272E] rounded-lg transition-colors">
                 <i class="fas fa-file-import mr-2 text-xs text-gray-500"></i>
                 Import code or design
             </button>
         </div>
 
         <nav class="flex-1 px-3 space-y-0.5 overflow-y-auto">
-            <a href="#" class="sidebar-link active">
+            <a href="#" onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="sidebar-link active">
                 <i class="fas fa-home"></i>
                 <span>Home</span>
             </a>
-            <a href="#" class="sidebar-link">
+            <a href="#" onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="sidebar-link">
                 <i class="fas fa-folder"></i>
                 <span>Projects</span>
             </a>
-            <a href="#" class="sidebar-link">
+            <a href="#" onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="sidebar-link">
                 <i class="fas fa-globe"></i>
                 <span>Published Projects</span>
             </a>
-            <a href="#" class="sidebar-link">
+            <a href="#" onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="sidebar-link">
                 <i class="fas fa-cog"></i>
                 <span>Settings</span>
             </a>
@@ -164,21 +165,26 @@
             <div class="pt-6 pb-2 px-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">DevAssist Pro</div>
             <div class="mx-3 p-4 bg-gradient-to-br from-[#2D3139] to-[#1C1E24] rounded-xl border border-base mb-4">
                 <p class="text-[11px] text-gray-300 mb-3">Unlock unlimited AI completions and priority support.</p>
-                <button class="w-full py-2 bg-indigo-600 text-white text-[11px] font-bold rounded-lg">Upgrade to Pro</button>
+                <button onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="w-full py-2 bg-indigo-600 text-white text-[11px] font-bold rounded-lg">Upgrade to Pro</button>
             </div>
 
-            <a href="#" class="sidebar-link">
+            <a href="#" onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="sidebar-link">
                 <i class="fas fa-book-open"></i>
                 <span>Learn</span>
             </a>
-            <a href="#" class="sidebar-link">
+            <a href="#" onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="sidebar-link">
                 <i class="fas fa-file-alt"></i>
                 <span>Documentation</span>
             </a>
         </nav>
 
         <div class="p-4 border-t border-base">
-            <div class="text-[11px] font-bold text-gray-500 uppercase mb-3">System Status</div>
+            <div class="flex items-center justify-between mb-3">
+                <div class="text-[11px] font-bold text-gray-500 uppercase">System Status</div>
+                <button onclick="toggleAppMute()" class="text-gray-500 hover:text-white transition-colors">
+                    <i id="mute-icon" class="fas fa-volume-up text-xs"></i>
+                </button>
+            </div>
             <div class="space-y-3">
                 <div>
                     <div class="flex justify-between text-[11px] mb-1">
@@ -200,10 +206,10 @@
                     </div>
                 </div>
             </div>
-            <button onclick="clearGlobalMemory()" class="w-full mt-4 py-2 border border-red-500/30 text-red-400 text-[10px] font-bold rounded-lg hover:bg-red-500/10 transition-all">
+            <button onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click'); clearGlobalMemory()" class="w-full mt-4 py-2 border border-red-500/30 text-red-400 text-[10px] font-bold rounded-lg hover:bg-red-500/10 transition-all">
                 WIPE NEURAL CACHE
             </button>
-            <button class="w-full mt-2 flex items-center px-3 py-2 text-xs text-gray-500 hover:text-white transition-colors">
+            <button onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="w-full mt-2 flex items-center px-3 py-2 text-xs text-gray-500 hover:text-white transition-colors">
                 <i class="fas fa-sign-out-alt mr-2"></i> Sign out
             </button>
         </div>
@@ -221,47 +227,47 @@
                     <textarea id="chat-input-welcome" placeholder="Describe your idea, DevAssist will bring it to life..." 
                         class="w-full bg-transparent border-none text-white focus:ring-0 resize-none h-16 text-lg placeholder:text-gray-600"></textarea>
                     <div class="flex items-center justify-between mt-4">
-                        <button class="flex items-center text-gray-500 hover:text-gray-300 text-sm font-medium transition-colors">
+                        <button onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="flex items-center text-gray-500 hover:text-gray-300 text-sm font-medium transition-colors">
                             <i class="fas fa-plus mr-2"></i> Attach
                         </button>
-                        <button onclick="sendMessage('welcome')" class="replit-btn-primary px-6 py-2 text-sm font-bold flex items-center">
+                        <button onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click'); sendMessage('welcome')" class="replit-btn-primary px-6 py-2 text-sm font-bold flex items-center">
                             Build <i class="fas fa-arrow-right ml-2 text-xs"></i>
                         </button>
                     </div>
                 </div>
 
                 <div class="flex items-center justify-center space-x-2 pt-4">
-                    <button class="p-2 text-gray-500 hover:text-gray-300"><i class="fas fa-chevron-left text-xs"></i></button>
+                    <button onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="p-2 text-gray-500 hover:text-gray-300"><i class="fas fa-chevron-left text-xs"></i></button>
                     <div class="flex space-x-6 overflow-x-auto no-scrollbar py-2">
-                        <div class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
+                        <div onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
                             <i class="fas fa-globe text-xl"></i>
                             <span class="text-[11px] font-medium">Web App</span>
                         </div>
-                        <div class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
+                        <div onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
                             <i class="fas fa-mobile-alt text-xl"></i>
                             <span class="text-[11px] font-medium">Mobile</span>
                         </div>
-                        <div class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
+                        <div onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
                             <i class="fas fa-paint-brush text-xl"></i>
                             <span class="text-[11px] font-medium">Design</span>
                         </div>
-                        <div class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
+                        <div onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
                             <i class="fas fa-tv text-xl"></i>
                             <span class="text-[11px] font-medium">Slides</span>
                         </div>
-                        <div class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
+                        <div onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
                             <i class="fas fa-bolt text-xl"></i>
                             <span class="text-[11px] font-medium">API</span>
                         </div>
                     </div>
-                    <button class="p-2 text-gray-500 hover:text-gray-300"><i class="fas fa-chevron-right text-xs"></i></button>
+                    <button onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click')" class="p-2 text-gray-500 hover:text-gray-300"><i class="fas fa-chevron-right text-xs"></i></button>
                 </div>
 
                 <div class="flex flex-wrap justify-center gap-2 pt-2">
                     <span class="text-[11px] text-gray-500 mr-2 py-1">Try an example prompt</span>
-                    <button onclick="useSuggestion('AI chat interface')" class="suggestion-chip">AI chat interface</button>
-                    <button onclick="useSuggestion('Portfolio website')" class="suggestion-chip">Portfolio website</button>
-                    <button onclick="useSuggestion('REST API server')" class="suggestion-chip">REST API server</button>
+                    <button onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click'); useSuggestion('AI chat interface')" class="suggestion-chip">AI chat interface</button>
+                    <button onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click'); useSuggestion('Portfolio website')" class="suggestion-chip">Portfolio website</button>
+                    <button onmouseenter="SFXManager_Vanilla.play('hover')" onclick="SFXManager_Vanilla.play('btn_click'); useSuggestion('REST API server')" class="suggestion-chip">REST API server</button>
                 </div>
             </div>
 
@@ -470,6 +476,7 @@
             const activeId = localStorage.getItem('codify_active_project');
             if (!activeId || activeId === 'none') {
                 terminalLog(`[ERR] Neural context missing. Select project first.`, 'red');
+                SFXManager_Vanilla.play('error');
                 return alert('Please select a project to use neural tools.');
             }
 
@@ -477,10 +484,12 @@
             const project = projects.find(p => p.id === activeId);
             
             terminalLog(`[AI] Initializing specialized agent: ${toolType.toUpperCase()}...`, 'indigo');
+            SFXManager_Vanilla.play('btn_toggle');
             addMessage(`Running **${toolType.toUpperCase()} Agent** on project: **${project.name}**...`, 'ai');
 
             // Switch to workspace view if needed
-            document.getElementById('workspace-welcome').classList.add('hidden');
+            const welcomeView = document.getElementById('workspace-welcome');
+            if (welcomeView) welcomeView.classList.add('hidden');
             document.getElementById('active-workspace').classList.remove('hidden');
 
             // Simulate AI work with terminal logs
@@ -490,6 +499,7 @@
                         terminalLog(`[AI] Scanning ${project.files.length} files for logic patterns...`, 'indigo');
                         setTimeout(() => {
                             terminalLog(`[AI] Found 3 potential optimizations in index.html`, 'emerald');
+                            SFXManager_Vanilla.play('success');
                             addMessage(`I've completed a **Smart Refactor** scan. I recommend moving your inline styles to \`style.css\` and using more modular functions in \`script.js\`. Should I apply these changes?`, 'ai');
                             CODIFY_STATE.updateMemory('code refactored', project.name);
                         }, 1000);
@@ -498,6 +508,7 @@
                         terminalLog(`[AI] Analyzing viewport compatibility and color contrast...`, 'indigo');
                         setTimeout(() => {
                             terminalLog(`[AI] UI optimization suggestions generated.`, 'emerald');
+                            SFXManager_Vanilla.play('success');
                             addMessage(`**UI Optimizer Report**: Your current layout has a 98% accessibility score. I suggest increasing the line-height in your paragraph tags for better readability on mobile devices.`, 'ai');
                             CODIFY_STATE.updateMemory('ui optimized', project.name);
                         }, 1000);
@@ -506,6 +517,7 @@
                         terminalLog(`[AI] Starting deep dependency scan and XSS audit...`, 'red');
                         setTimeout(() => {
                             terminalLog(`[AI] Security scan complete. 0 critical vulnerabilities found.`, 'emerald');
+                            SFXManager_Vanilla.play('success');
                             addMessage(`**Security Lab Result**: Project is secure. No sensitive keys found in source code and dependency tree is clean. Keep up the good work, Architect!`, 'ai');
                             CODIFY_STATE.updateMemory('security scan complete', project.name);
                         }, 1500);
@@ -514,6 +526,7 @@
                         terminalLog(`[AI] Generating neural documentation from source code...`, 'indigo');
                         setTimeout(() => {
                             terminalLog(`[IO] New file created: README_AI.md`, 'emerald');
+                            SFXManager_Vanilla.play('success');
                             project.files.push({ name: 'README_AI.md', type: 'file', content: `# AI Documentation for ${project.name}\n\nGenerated by CODIFY MAX Agent.\n\n## Project Overview\nCategory: ${project.category}\n\n## File Structure\n${project.files.map(f => `- ${f.name}`).join('\n')}` });
                             localStorage.setItem('codify_projects', JSON.stringify(projects));
                             renderFileTree(project.files);
@@ -598,6 +611,9 @@
             const message = input.value.trim();
             if (!message) return;
 
+            // SFX Play click
+            SFXManager_Vanilla.play('btn_click');
+
             // Switch to workspace view
             document.getElementById('workspace-welcome').classList.add('hidden');
             document.getElementById('active-workspace').classList.remove('hidden');
@@ -622,6 +638,9 @@
                 
                 const response = getAIResponse(message);
                 addMessage(response, 'ai');
+                
+                // SFX Success on AI response
+                SFXManager_Vanilla.play('success');
             }, 1000);
         }
 
@@ -664,7 +683,10 @@
             const name = document.getElementById('new-project-name').value;
             const category = document.getElementById('new-project-category').value;
 
-            if (!name) return alert('Please enter a project name');
+            if (!name) {
+                SFXManager_Vanilla.play('error');
+                return alert('Please enter a project name');
+            }
 
             const project = {
                 id: Date.now().toString(),
@@ -688,6 +710,7 @@
             updateProjectSelector();
             switchProject(project.id);
             addNotification(`Project "${name}" created!`);
+            SFXManager_Vanilla.play('success');
         }
 
         function switchProject(projectId) {
@@ -884,6 +907,18 @@
                 const history = JSON.parse(localStorage.getItem('codify_chat_history') || '[]');
                 history.push({ text, sender, timestamp: new Date().toISOString() });
                 localStorage.setItem('codify_chat_history', JSON.stringify(history));
+            }
+        }
+
+        function toggleAppMute() {
+            const isMuted = SFXManager_Vanilla.toggleMute();
+            const icon = document.getElementById('mute-icon');
+            if (isMuted) {
+                icon.classList.remove('fa-volume-up');
+                icon.classList.add('fa-volume-mute', 'text-red-500');
+            } else {
+                icon.classList.remove('fa-volume-mute', 'text-red-500');
+                icon.classList.add('fa-volume-up');
             }
         }
 
