@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CODIFY Studio - AI Design & Coding Assistant</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+    <style>
+        /* Replit Dark Pro Aesthetic */
+        :root {
+            --bg-main: #121417;
+            --bg-sidebar: #121417;
+            --bg-card: #1C1E24;
+            --border-base: #2D3139;
+            --accent-purple: #925CFF;
+            --text-main: #F5F9FC;
+            --text-muted: #8B949E;
+            --input-bg: #1C1E24;
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        .replit-sidebar {
+            background-color: var(--bg-sidebar);
+            border-right: 1px solid var(--border-base);
+        }
+
+        .replit-btn-primary {
+            background-color: var(--accent-purple);
+            color: white;
+            border-radius: 8px;
+            transition: all 0.2s;
+        }
+
+        .replit-btn-primary:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+        }
+
+        .replit-card {
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-base);
+            border-radius: 12px;
+            transition: border-color 0.2s;
+        }
+
+        .replit-card:hover {
+            border-color: #444955;
+        }
+
+        .replit-input-container {
+            background-color: var(--input-bg);
+            border: 1px solid var(--border-base);
+            border-radius: 16px;
+            padding: 20px;
+        }
+
+        .replit-input-container:focus-within {
+            border-color: var(--accent-purple);
+            box-shadow: 0 0 0 1px var(--accent-purple);
+        }
+
+        .sidebar-link {
+            display: flex;
+            items-center: center;
+            padding: 8px 12px;
+            color: var(--text-muted);
+            font-size: 14px;
+            border-radius: 8px;
+            margin: 2px 0;
+        }
+
+        .sidebar-link:hover, .sidebar-link.active {
+            color: var(--text-main);
+            background-color: #24272E;
+        }
+
+        .sidebar-link i {
+            width: 20px;
+            margin-right: 12px;
+            font-size: 16px;
+        }
+
+        .suggestion-chip {
+            background: transparent;
+            border: 1px solid var(--border-base);
+            color: var(--text-muted);
+            border-radius: 20px;
+            padding: 6px 16px;
+            font-size: 13px;
+            transition: all 0.2s;
+        }
+
+        .suggestion-chip:hover {
+            color: var(--text-main);
+            border-color: #444955;
+            background-color: #24272E;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-replit { animation: fadeIn 0.3s ease-out forwards; }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden">
+
+    <!-- Left Sidebar -->
+    <aside class="w-60 flex-shrink-0 flex flex-col replit-sidebar">
+        <div class="p-4 flex items-center space-x-2">
+            <div class="w-6 h-6 bg-white rounded flex items-center justify-center">
+                <i class="fas fa-terminal text-black text-xs"></i>
+            </div>
+            <span class="font-bold text-sm">fg's Workspace</span>
+            <i class="fas fa-chevron-down text-[10px] text-gray-500"></i>
+        </div>
+
+        <div class="px-3 mb-4">
+            <button onclick="openNewProjectModal()" class="w-full py-2 bg-[#24272E] border border-base rounded-lg text-sm font-medium flex items-center justify-center hover:bg-[#2D3139] transition-colors">
+                <i class="fas fa-plus mr-2 text-xs"></i>
+                Create something new
+            </button>
+            <button class="w-full mt-2 py-2 text-sm font-medium flex items-center justify-center hover:bg-[#24272E] rounded-lg transition-colors">
+                <i class="fas fa-file-import mr-2 text-xs text-gray-500"></i>
+                Import code or design
+            </button>
+        </div>
+
+        <nav class="flex-1 px-3 space-y-0.5 overflow-y-auto">
+            <a href="#" class="sidebar-link active">
+                <i class="fas fa-home"></i>
+                <span>Home</span>
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-folder"></i>
+                <span>Projects</span>
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-globe"></i>
+                <span>Published Projects</span>
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+            </a>
+
+            <div class="pt-6 pb-2 px-3 text-[11px] font-bold text-gray-500 uppercase tracking-wider">DevAssist Pro</div>
+            <div class="mx-3 p-4 bg-gradient-to-br from-[#2D3139] to-[#1C1E24] rounded-xl border border-base mb-4">
+                <p class="text-[11px] text-gray-300 mb-3">Unlock unlimited AI completions and priority support.</p>
+                <button class="w-full py-2 bg-indigo-600 text-white text-[11px] font-bold rounded-lg">Upgrade to Pro</button>
+            </div>
+
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-book-open"></i>
+                <span>Learn</span>
+            </a>
+            <a href="#" class="sidebar-link">
+                <i class="fas fa-file-alt"></i>
+                <span>Documentation</span>
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-base">
+            <div class="text-[11px] font-bold text-gray-500 uppercase mb-3">System Status</div>
+            <div class="space-y-3">
+                <div>
+                    <div class="flex justify-between text-[11px] mb-1">
+                        <span class="text-gray-400">Neural Sync</span>
+                        <span id="neural-sync-val" class="text-emerald-400 font-bold">100%</span>
+                    </div>
+                    <div class="w-full bg-[#24272E] h-1.5 rounded-full overflow-hidden">
+                        <div id="neural-sync-bar" class="bg-emerald-500 h-full shadow-[0_0_10px_#10B981]" style="width: 100%"></div>
+                    </div>
+                </div>
+                <div>
+                    <div class="flex justify-between text-[11px] mb-1">
+                        <span class="text-gray-400">Model: CODIFY-V4</span>
+                        <span class="text-indigo-400 font-bold">PRO</span>
+                    </div>
+                    <div class="flex items-center space-x-1">
+                        <div class="w-1 h-1 bg-indigo-500 rounded-full animate-pulse"></div>
+                        <span class="text-[9px] text-indigo-300 uppercase tracking-tighter">Ready for architect</span>
+                    </div>
+                </div>
+            </div>
+            <button onclick="clearGlobalMemory()" class="w-full mt-4 py-2 border border-red-500/30 text-red-400 text-[10px] font-bold rounded-lg hover:bg-red-500/10 transition-all">
+                WIPE NEURAL CACHE
+            </button>
+            <button class="w-full mt-2 flex items-center px-3 py-2 text-xs text-gray-500 hover:text-white transition-colors">
+                <i class="fas fa-sign-out-alt mr-2"></i> Sign out
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col overflow-y-auto bg-main custom-scrollbar">
+        <div class="max-w-4xl mx-auto w-full px-8 py-12 space-y-12">
+            
+            <!-- Welcome Header -->
+            <div class="text-center space-y-4 animate-replit">
+                <h2 class="text-3xl font-bold tracking-tight">Hi fg, what do you want to make?</h2>
+                
+                <div class="replit-input-container text-left group">
+                    <textarea id="chat-input-welcome" placeholder="Describe your idea, DevAssist will bring it to life..." 
+                        class="w-full bg-transparent border-none text-white focus:ring-0 resize-none h-16 text-lg placeholder:text-gray-600"></textarea>
+                    <div class="flex items-center justify-between mt-4">
+                        <button class="flex items-center text-gray-500 hover:text-gray-300 text-sm font-medium transition-colors">
+                            <i class="fas fa-plus mr-2"></i> Attach
+                        </button>
+                        <button onclick="sendMessage('welcome')" class="replit-btn-primary px-6 py-2 text-sm font-bold flex items-center">
+                            Build <i class="fas fa-arrow-right ml-2 text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="flex items-center justify-center space-x-2 pt-4">
+                    <button class="p-2 text-gray-500 hover:text-gray-300"><i class="fas fa-chevron-left text-xs"></i></button>
+                    <div class="flex space-x-6 overflow-x-auto no-scrollbar py-2">
+                        <div class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
+                            <i class="fas fa-globe text-xl"></i>
+                            <span class="text-[11px] font-medium">Web App</span>
+                        </div>
+                        <div class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
+                            <i class="fas fa-mobile-alt text-xl"></i>
+                            <span class="text-[11px] font-medium">Mobile</span>
+                        </div>
+                        <div class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
+                            <i class="fas fa-paint-brush text-xl"></i>
+                            <span class="text-[11px] font-medium">Design</span>
+                        </div>
+                        <div class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
+                            <i class="fas fa-tv text-xl"></i>
+                            <span class="text-[11px] font-medium">Slides</span>
+                        </div>
+                        <div class="flex flex-col items-center space-y-2 opacity-50 hover:opacity-100 cursor-pointer">
+                            <i class="fas fa-bolt text-xl"></i>
+                            <span class="text-[11px] font-medium">API</span>
+                        </div>
+                    </div>
+                    <button class="p-2 text-gray-500 hover:text-gray-300"><i class="fas fa-chevron-right text-xs"></i></button>
+                </div>
+
+                <div class="flex flex-wrap justify-center gap-2 pt-2">
+                    <span class="text-[11px] text-gray-500 mr-2 py-1">Try an example prompt</span>
+                    <button onclick="useSuggestion('AI chat interface')" class="suggestion-chip">AI chat interface</button>
+                    <button onclick="useSuggestion('Portfolio website')" class="suggestion-chip">Portfolio website</button>
+                    <button onclick="useSuggestion('REST API server')" class="suggestion-chip">REST API server</button>
+                </div>
+            </div>
+
+            <!-- Recent Projects Section -->
+            <div class="space-y-6 pt-12 animate-replit" style="animation-delay: 0.1s">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-bold">Your recent Projects</h3>
+                    <button class="text-gray-500 hover:text-gray-300"><i class="fas fa-sync-alt text-sm"></i></button>
+                </div>
+
+                <div id="project-list" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <!-- Project Cards -->
+                    <div class="replit-card p-4 flex flex-col space-y-4 cursor-pointer">
+                        <div class="w-full h-32 bg-[#24272E] rounded-lg overflow-hidden flex flex-col p-4 space-y-2 border border-base">
+                            <div class="w-3/4 h-2 bg-gray-700 rounded"></div>
+                            <div class="w-full h-2 bg-gray-800 rounded"></div>
+                            <div class="flex space-x-2 mt-4">
+                                <div class="w-8 h-8 bg-indigo-500/20 rounded"></div>
+                                <div class="w-8 h-8 bg-indigo-500/20 rounded"></div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-sm">AI chat interface</h4>
+                                <p class="text-[11px] text-gray-500">14h ago</p>
+                            </div>
+                            <div class="flex items-center text-[10px] text-gray-500 bg-[#24272E] px-2 py-0.5 rounded">
+                                <i class="fab fa-js mr-1 text-yellow-500"></i> JavaScript
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="replit-card p-4 flex flex-col space-y-4 cursor-pointer">
+                        <div class="w-full h-32 bg-[#24272E] rounded-lg overflow-hidden flex flex-col p-4 space-y-2 border border-base">
+                            <div class="w-full h-full bg-gradient-to-br from-[#1C1E24] to-[#2D3139] flex items-center justify-center">
+                                <div class="w-16 h-10 border-2 border-indigo-500/20 rounded flex items-center justify-center">
+                                    <div class="w-10 h-1 bg-indigo-500/20 rounded"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="flex justify-between items-start">
+                            <div>
+                                <h4 class="font-bold text-sm">hi</h4>
+                                <p class="text-[11px] text-gray-500">14h ago</p>
+                            </div>
+                            <div class="flex items-center text-[10px] text-gray-500 bg-[#24272E] px-2 py-0.5 rounded">
+                                <i class="fab fa-js mr-1 text-yellow-500"></i> JavaScript
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chat History View (Hidden by default) -->
+        <div id="active-workspace" class="hidden flex-1 flex flex-col bg-main">
+            <div id="chat-messages-container" class="flex-1 overflow-y-auto p-8 space-y-8 custom-scrollbar">
+                <!-- Messages -->
+            </div>
+            
+            <div class="p-4 border-t border-base">
+                <div class="max-w-4xl mx-auto relative">
+                    <div class="replit-input-container p-3 flex items-center space-x-3">
+                        <textarea id="chat-input-workspace" placeholder="Make, test, iterate..." 
+                            class="flex-1 bg-transparent border-none text-white focus:ring-0 resize-none h-10 text-sm py-2"></textarea>
+                        <button onclick="sendMessage('workspace')" class="replit-btn-primary w-8 h-8 flex items-center justify-center">
+                            <i class="fas fa-arrow-up text-xs"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Library Sidebar (Right) -->
+    <aside class="w-60 flex-shrink-0 flex flex-col border-l border-base replit-sidebar">
+        <div class="p-4 border-b border-base flex items-center justify-between">
+            <h3 class="text-xs font-bold text-gray-400 uppercase">Library</h3>
+            <div class="flex space-x-2 text-gray-500">
+                <i class="fas fa-align-left text-xs"></i>
+                <i class="fas fa-tree text-xs"></i>
+            </div>
+        </div>
+        
+        <div class="p-4">
+            <div class="relative mb-4">
+                <input type="text" placeholder="Search files" class="w-full bg-[#1C1E24] border border-base rounded-md px-3 py-1.5 text-xs text-white focus:ring-1 focus:ring-indigo-500 outline-none">
+                <i class="fas fa-search absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-500"></i>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-[11px] font-bold text-gray-500 uppercase">Apps</span>
+                        <i class="fas fa-plus text-[10px] text-gray-500"></i>
+                    </div>
+                    <div class="space-y-1">
+                        <div class="flex items-center p-2 hover:bg-[#24272E] rounded-md cursor-pointer group">
+                            <div class="w-8 h-8 bg-indigo-500/10 rounded mr-3 flex items-center justify-center">
+                                <i class="fas fa-rocket text-xs text-indigo-400"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[11px] font-bold truncate">AI Coding Assistant...</p>
+                                <p class="text-[10px] text-gray-500">Website</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- Modal Overlays -->
+    <div id="new-project-modal" class="fixed inset-0 z-[100] hidden flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm">
+        <div class="bg-[#1C2128] border border-base rounded-2xl w-full max-w-md shadow-2xl animate-fade-in overflow-hidden">
+            <div class="p-6 border-b border-base flex items-center justify-between">
+                <h3 class="text-xl font-bold text-white">Start New Project</h3>
+                <button onclick="closeNewProjectModal()" class="text-gray-400 hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Project Name</label>
+                    <input type="text" id="new-project-name" placeholder="e.g. My Awesome App" class="w-full bg-[#0D0F14] border border-base rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                </div>
+                <div>
+                    <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Category</label>
+                    <select id="new-project-category" class="w-full bg-[#0D0F14] border border-base rounded-xl px-4 py-3 text-sm text-white focus:ring-2 focus:ring-indigo-500 outline-none">
+                        <option value="web">Web Development</option>
+                        <option value="game">Game Design</option>
+                        <option value="ui">UI/UX Prototype</option>
+                        <option value="python">Python Program</option>
+                    </select>
+                </div>
+                <button onclick="createNewProject()" class="accent-bg w-full py-4 rounded-xl font-bold text-sm text-white shadow-lg shadow-indigo-500/20">
+                    CREATE PROJECT
+                </button>
+            </div>
+            <div class="px-6 pb-6 border-t border-base pt-4">
+                <label class="block text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-2">Import Existing Project</label>
+                <div class="flex items-center space-x-2">
+                    <input type="file" id="import-project-file" class="hidden" onchange="handleProjectImport(this)">
+                    <button onclick="document.getElementById('import-project-file').click()" class="flex-1 py-2 border border-base rounded-lg text-xs text-gray-400 hover:text-white transition-colors">
+                        <i class="fas fa-upload mr-2"></i> Select File (.json)
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Advanced Neural State Management
+        const CODIFY_STATE = {
+            memory: JSON.parse(localStorage.getItem('codify_memory') || '{"preferences": [], "interactions": 0, "tone": "professional", "projects": {}, "skills": {"design": 0, "code": 0, "security": 0, "performance": 0}, "level": 1}'),
+            
+            updateMemory: function(input, projectName = null) {
+                this.memory.interactions++;
+                const lowerInput = input.toLowerCase();
+                
+                // Track Interests & Skills
+                if (lowerInput.includes('react') || lowerInput.includes('js')) this.memory.skills.code += 2;
+                if (lowerInput.includes('ui') || lowerInput.includes('design')) this.memory.skills.design += 2;
+                if (lowerInput.includes('security') || lowerInput.includes('audit')) this.memory.skills.security += 5;
+                if (lowerInput.includes('speed') || lowerInput.includes('fast')) this.memory.skills.performance += 5;
+                
+                // Level Up Logic
+                this.memory.level = Math.floor(this.memory.interactions / 10) + 1;
+
+                if (projectName) {
+                    if (!this.memory.projects[projectName]) this.memory.projects[projectName] = [];
+                    this.memory.projects[projectName].push({ input, timestamp: new Date().toISOString() });
+                }
+
+                if (this.memory.interactions > 5) this.memory.tone = "friendly-expert";
+                if (this.memory.interactions > 20) this.memory.tone = "majhoul-partner";
+                
+                localStorage.setItem('codify_memory', JSON.stringify(this.memory));
+                this.updateUI();
+            },
+
+            updateUI: function() {
+                const levelEl = document.getElementById('neural-level');
+                if (levelEl) levelEl.innerText = `LVL ${this.memory.level}`;
+
+                // Update Progress Bars
+                const designVal = document.getElementById('skill-design-val');
+                const designBar = document.getElementById('skill-design-bar');
+                const codeVal = document.getElementById('skill-code-val');
+                const codeBar = document.getElementById('skill-code-bar');
+
+                if (designVal && designBar) {
+                    const val = Math.min(this.memory.skills.design, 100);
+                    designVal.innerText = `${val}%`;
+                    designBar.style.width = `${val}%`;
+                }
+                if (codeVal && codeBar) {
+                    const val = Math.min(this.memory.skills.code, 100);
+                    codeVal.innerText = `${val}%`;
+                    codeBar.style.width = `${val}%`;
+                }
+            }
+        };
+
+        async function runAITool(toolType) {
+            const activeId = localStorage.getItem('codify_active_project');
+            if (!activeId || activeId === 'none') {
+                terminalLog(`[ERR] Neural context missing. Select project first.`, 'red');
+                return alert('Please select a project to use neural tools.');
+            }
+
+            const projects = JSON.parse(localStorage.getItem('codify_projects') || '[]');
+            const project = projects.find(p => p.id === activeId);
+            
+            terminalLog(`[AI] Initializing specialized agent: ${toolType.toUpperCase()}...`, 'indigo');
+            addMessage(`Running **${toolType.toUpperCase()} Agent** on project: **${project.name}**...`, 'ai');
+
+            // Switch to workspace view if needed
+            document.getElementById('workspace-welcome').classList.add('hidden');
+            document.getElementById('active-workspace').classList.remove('hidden');
+
+            // Simulate AI work with terminal logs
+            setTimeout(() => {
+                switch(toolType) {
+                    case 'refactor':
+                        terminalLog(`[AI] Scanning ${project.files.length} files for logic patterns...`, 'indigo');
+                        setTimeout(() => {
+                            terminalLog(`[AI] Found 3 potential optimizations in index.html`, 'emerald');
+                            addMessage(`I've completed a **Smart Refactor** scan. I recommend moving your inline styles to \`style.css\` and using more modular functions in \`script.js\`. Should I apply these changes?`, 'ai');
+                            CODIFY_STATE.updateMemory('code refactored', project.name);
+                        }, 1000);
+                        break;
+                    case 'ui-opt':
+                        terminalLog(`[AI] Analyzing viewport compatibility and color contrast...`, 'indigo');
+                        setTimeout(() => {
+                            terminalLog(`[AI] UI optimization suggestions generated.`, 'emerald');
+                            addMessage(`**UI Optimizer Report**: Your current layout has a 98% accessibility score. I suggest increasing the line-height in your paragraph tags for better readability on mobile devices.`, 'ai');
+                            CODIFY_STATE.updateMemory('ui optimized', project.name);
+                        }, 1000);
+                        break;
+                    case 'security':
+                        terminalLog(`[AI] Starting deep dependency scan and XSS audit...`, 'red');
+                        setTimeout(() => {
+                            terminalLog(`[AI] Security scan complete. 0 critical vulnerabilities found.`, 'emerald');
+                            addMessage(`**Security Lab Result**: Project is secure. No sensitive keys found in source code and dependency tree is clean. Keep up the good work, Architect!`, 'ai');
+                            CODIFY_STATE.updateMemory('security scan complete', project.name);
+                        }, 1500);
+                        break;
+                    case 'docs':
+                        terminalLog(`[AI] Generating neural documentation from source code...`, 'indigo');
+                        setTimeout(() => {
+                            terminalLog(`[IO] New file created: README_AI.md`, 'emerald');
+                            project.files.push({ name: 'README_AI.md', type: 'file', content: `# AI Documentation for ${project.name}\n\nGenerated by CODIFY MAX Agent.\n\n## Project Overview\nCategory: ${project.category}\n\n## File Structure\n${project.files.map(f => `- ${f.name}`).join('\n')}` });
+                            localStorage.setItem('codify_projects', JSON.stringify(projects));
+                            renderFileTree(project.files);
+                            addMessage(`I've generated a comprehensive **README_AI.md** file for your project based on the existing code structure. Check the File Manager!`, 'ai');
+                            CODIFY_STATE.updateMemory('docs generated', project.name);
+                        }, 1200);
+                        break;
+                }
+            }, 500);
+        }
+
+        // Project Neural Logic
+        async function downloadActiveProject() {
+            const activeId = localStorage.getItem('codify_active_project');
+            if (!activeId || activeId === 'none') return alert('Initialize workspace context first.');
+            
+            const projects = JSON.parse(localStorage.getItem('codify_projects') || '[]');
+            const project = projects.find(p => p.id === activeId);
+            
+            if (!project) return;
+
+            terminalLog(`[IO] Compressing CORE: ${project.name}...`, 'indigo');
+            
+            const zip = new JSZip();
+            project.files.forEach(file => {
+                zip.file(file.name, file.content);
+            });
+
+            const content = await zip.generateAsync({type:"blob"});
+            const url = window.URL.createObjectURL(content);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `${project.name.replace(/\s+/g, '_')}_core.zip`;
+            a.click();
+            
+            terminalLog(`[IO] Success: ${project.name} exported.`, 'emerald');
+        }
+
+        function terminalLog(msg, color = 'gray') {
+            const output = document.getElementById('terminal-output');
+            const entry = document.createElement('div');
+            const colors = {
+                indigo: 'text-indigo-400',
+                emerald: 'text-emerald-400',
+                red: 'text-red-400',
+                gray: 'text-gray-500'
+            };
+            entry.className = colors[color] || 'text-gray-500';
+            entry.innerHTML = `<span class="text-gray-700">[${new Date().toLocaleTimeString()}]</span> ${msg}`;
+            output.appendChild(entry);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function switchProject(projectId) {
+            if (projectId === 'none') {
+                document.getElementById('workspace-welcome').classList.remove('hidden');
+                document.getElementById('active-workspace').classList.add('hidden');
+                return;
+            }
+            
+            const projects = JSON.parse(localStorage.getItem('codify_projects') || '[]');
+            const project = projects.find(p => p.id === projectId);
+            
+            if (project) {
+                localStorage.setItem('codify_active_project', projectId);
+                
+                // Switch Views
+                document.getElementById('workspace-welcome').classList.add('hidden');
+                document.getElementById('active-workspace').classList.remove('hidden');
+                
+                renderFileTree(project.files);
+                
+                const chatContainer = document.getElementById('chat-messages-container');
+                chatContainer.innerHTML = '';
+                addMessage(`Neural link established with **${project.name}**. What are we building?`, 'ai', false);
+            }
+        }
+
+        function sendMessage(view) {
+            const inputId = view === 'welcome' ? 'chat-input-welcome' : 'chat-input-workspace';
+            const input = document.getElementById(inputId);
+            const message = input.value.trim();
+            if (!message) return;
+
+            // Switch to workspace view
+            document.getElementById('workspace-welcome').classList.add('hidden');
+            document.getElementById('active-workspace').classList.remove('hidden');
+
+            addMessage(message, 'user');
+            input.value = '';
+            CODIFY_STATE.updateMemory(message);
+
+            // Typing indicator
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'flex items-center space-x-2 p-4 bg-[#1C1E24] rounded-2xl w-20';
+            typingDiv.innerHTML = `<div class="w-1 h-1 bg-indigo-500 rounded-full animate-bounce"></div><div class="w-1 h-1 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div><div class="w-1 h-1 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>`;
+            document.getElementById('chat-messages-container').appendChild(typingDiv);
+            
+            const container = document.getElementById('chat-messages-container');
+            container.scrollTop = container.scrollHeight;
+
+            setTimeout(() => {
+                const typing = document.getElementById('typing-indicator');
+                if (typing) typing.remove();
+                
+                const response = getAIResponse(message);
+                addMessage(response, 'ai');
+            }, 1000);
+        }
+
+        function addMessage(text, sender, save = true) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex flex-col ${sender === 'user' ? 'items-end' : 'items-start'} animate-replit`;
+            
+            const contentClass = sender === 'user' 
+                ? 'bg-indigo-600 text-white rounded-tr-none' 
+                : 'bg-[#1C1E24] border border-base text-gray-200 rounded-tl-none';
+
+            msgDiv.innerHTML = `
+                <div class="${contentClass} p-4 rounded-2xl text-[13px] max-w-[85%] leading-relaxed shadow-sm">
+                    ${text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}
+                </div>
+                <span class="text-[10px] text-gray-500 mt-2 mx-2">Just now</span>
+            `;
+
+            const container = document.getElementById('chat-messages-container');
+            container.appendChild(msgDiv);
+            container.scrollTop = container.scrollHeight;
+
+            if (save) {
+                const history = JSON.parse(localStorage.getItem('codify_chat_history') || '[]');
+                history.push({ text, sender, timestamp: new Date().toISOString() });
+                localStorage.setItem('codify_chat_history', JSON.stringify(history));
+            }
+        }
+
+        // Project Management
+        function openNewProjectModal() {
+            document.getElementById('new-project-modal').classList.remove('hidden');
+        }
+
+        function closeNewProjectModal() {
+            document.getElementById('new-project-modal').classList.add('hidden');
+        }
+
+        function createNewProject() {
+            const name = document.getElementById('new-project-name').value;
+            const category = document.getElementById('new-project-category').value;
+
+            if (!name) return alert('Please enter a project name');
+
+            const project = {
+                id: Date.now().toString(),
+                name,
+                category,
+                updated: 'Just now',
+                icon: category === 'web' ? 'fa-laptop-code' : (category === 'game' ? 'fa-gamepad' : 'fa-mobile-alt'),
+                files: [
+                    { name: 'index.html', type: 'file', content: '<!DOCTYPE html>\n<html>\n<head>\n<title>New Project</title>\n</head>\n<body>\n<h1>Hello Codify!</h1>\n</body>\n</html>' },
+                    { name: 'style.css', type: 'file', content: 'body { background: #000; color: #fff; }' },
+                    { name: 'script.js', type: 'file', content: 'console.log("Codify Project Started!");' }
+                ]
+            };
+
+            const projects = JSON.parse(localStorage.getItem('codify_projects') || '[]');
+            projects.unshift(project);
+            localStorage.setItem('codify_projects', JSON.stringify(projects));
+
+            closeNewProjectModal();
+            renderProjects();
+            updateProjectSelector();
+            switchProject(project.id);
+            addNotification(`Project "${name}" created!`);
+        }
+
+        function switchProject(projectId) {
+            if (projectId === 'none') return;
+            
+            const projects = JSON.parse(localStorage.getItem('codify_projects') || '[]');
+            const project = projects.find(p => p.id === projectId);
+            
+            if (project) {
+                localStorage.setItem('codify_active_project', projectId);
+                document.getElementById('active-project-selector').value = projectId;
+                renderFileTree(project.files);
+                addNotification(`Switched to project: **${project.name}**`);
+            }
+        }
+
+        function updateProjectSelector() {
+            const projects = JSON.parse(localStorage.getItem('codify_projects') || '[]');
+            const selector = document.getElementById('active-project-selector');
+            if (!selector) return;
+
+            selector.innerHTML = '<option value="none">Select Project</option>' + 
+                projects.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+            
+            const activeId = localStorage.getItem('codify_active_project');
+            if (activeId) selector.value = activeId;
+        }
+
+        function renderFileTree(files) {
+            const root = document.getElementById('file-tree-root');
+            if (!root) return;
+
+            root.innerHTML = files.map(file => `
+                <div class="flex items-center justify-between group px-2 py-1 rounded hover:bg-gray-800/50 cursor-pointer">
+                    <div class="flex items-center space-x-2">
+                        <i class="fas ${file.name.endsWith('.html') ? 'fa-code text-orange-400' : (file.name.endsWith('.css') ? 'fa-css3 text-blue-400' : 'fa-js text-yellow-400')} text-[10px]"></i>
+                        <span class="text-[11px] text-gray-400 group-hover:text-gray-200">${file.name}</span>
+                    </div>
+                    <button onclick="deleteFile('${file.name}')" class="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-400 transition-all">
+                        <i class="fas fa-trash-alt text-[10px]"></i>
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function createNewFilePrompt() {
+            const activeId = localStorage.getItem('codify_active_project');
+            if (!activeId || activeId === 'none') return alert('Please select a project first');
+            
+            const name = prompt('Enter file name (e.g. index.js):');
+            if (name) {
+                const projects = JSON.parse(localStorage.getItem('codify_projects') || '[]');
+                const pIndex = projects.findIndex(p => p.id === activeId);
+                if (pIndex > -1) {
+                    projects[pIndex].files.push({ name, type: 'file', content: '' });
+                    localStorage.setItem('codify_projects', JSON.stringify(projects));
+                    renderFileTree(projects[pIndex].files);
+                    addNotification(`File "${name}" created.`);
+                }
+            }
+        }
+
+        function handleProjectImport(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const project = JSON.parse(e.target.result);
+                    if (!project.name || !project.files) throw new Error('Invalid project format');
+                    
+                    project.id = Date.now().toString();
+                    const projects = JSON.parse(localStorage.getItem('codify_projects') || '[]');
+                    projects.unshift(project);
+                    localStorage.setItem('codify_projects', JSON.stringify(projects));
+                    
+                    updateProjectSelector();
+                    switchProject(project.id);
+                    renderProjects();
+                    closeNewProjectModal();
+                    addNotification(`Project "${project.name}" imported successfully!`);
+                } catch (err) {
+                    alert('Error importing project: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+        }
+
+        function renderProjects() {
+            const projects = JSON.parse(localStorage.getItem('codify_projects') || '[]');
+            const projectList = document.getElementById('project-list');
+            
+            if (!projectList) return;
+
+            if (projects.length === 0) {
+                projectList.innerHTML = `
+                    <div class="col-span-2 text-center py-12 bg-[#1C1E24] rounded-2xl border border-dashed border-[#2D3139]">
+                        <i class="fas fa-folder-open text-gray-600 text-3xl mb-3"></i>
+                        <p class="text-sm text-gray-500">No projects yet. Start one now!</p>
+                    </div>
+                `;
+                return;
+            }
+
+            projectList.innerHTML = projects.slice(0, 4).map(p => `
+                <div onclick="switchProject('${p.id}')" class="replit-card p-4 flex flex-col space-y-4 cursor-pointer group">
+                    <div class="w-full h-32 bg-[#24272E] rounded-lg overflow-hidden flex flex-col p-4 space-y-2 border border-base group-hover:border-[#444955] transition-all">
+                        <div class="w-3/4 h-2 bg-gray-700 rounded opacity-50"></div>
+                        <div class="w-full h-2 bg-gray-800 rounded opacity-50"></div>
+                        <div class="flex space-x-2 mt-4">
+                            <div class="w-8 h-8 bg-indigo-500/10 rounded flex items-center justify-center">
+                                <i class="fas ${p.icon} text-xs text-indigo-400"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-start">
+                        <div>
+                            <h4 class="font-bold text-sm text-white">${p.name}</h4>
+                            <p class="text-[11px] text-gray-500">${p.updated}</p>
+                        </div>
+                        <div class="flex items-center text-[10px] text-gray-500 bg-[#24272E] px-2 py-0.5 rounded border border-base">
+                            ${p.category === 'web' ? '<i class="fab fa-js mr-1 text-yellow-500"></i> JavaScript' : '<i class="fab fa-python mr-1 text-blue-400"></i> Python'}
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Project Inspection (Modified for new UI)
+        function inspectProject(name, desc, iconClass) {
+            // Since we moved to a new layout, we'll use the chat to "talk" about the project
+            addMessage(`Inspecting project: **${name}**`, 'ai');
+            addMessage(`Description: ${desc}`, 'ai');
+            CODIFY_STATE.updateMemory(`Inspecting ${name}`);
+        }
+
+        function sendMessage() {
+            const message = chatInput.value.trim();
+            if (!message) return;
+
+            // Switch to chat view if not already
+            document.querySelector('.max-w-2xl').classList.add('hidden');
+            document.getElementById('chat-messages-container').classList.remove('hidden');
+
+            // User Message
+            addMessage(message, 'user');
+            chatInput.value = '';
+
+            // Adaptive Learning update
+            CODIFY_STATE.updateMemory(message);
+
+            // AI Response (Typing Indicator)
+            const typingDiv = document.createElement('div');
+            typingDiv.id = 'typing-indicator';
+            typingDiv.className = 'flex items-center space-x-1 p-3 bg-gray-800/50 rounded-xl w-16';
+            typingDiv.innerHTML = `<div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce"></div><div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div><div class="w-1.5 h-1.5 bg-indigo-500 rounded-full animate-bounce" style="animation-delay: 0.4s"></div>`;
+            document.getElementById('chat-messages-container').appendChild(typingDiv);
+            
+            const mainScroll = document.querySelector('main');
+            mainScroll.scrollTop = mainScroll.scrollHeight;
+
+            setTimeout(() => {
+                const typing = document.getElementById('typing-indicator');
+                if (typing) typing.remove();
+                
+                const response = getAIResponse(message);
+                addMessage(response, 'ai');
+            }, 1200);
+        }
+
+        function addMessage(text, sender, save = true) {
+            const msgDiv = document.createElement('div');
+            msgDiv.className = `flex flex-col ${sender === 'user' ? 'items-end' : 'items-start'} animate-fade-in`;
+            
+            const contentClass = sender === 'user' 
+                ? 'bg-indigo-600 text-white rounded-tr-none' 
+                : 'bg-[#1C2128] border border-base text-gray-200 rounded-tl-none';
+
+            msgDiv.innerHTML = `
+                <div class="${contentClass} p-4 rounded-2xl text-sm max-w-[90%] shadow-lg">
+                    ${text.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')}
+                </div>
+                <span class="text-[10px] text-gray-500 mt-2 mx-2">Just now</span>
+            `;
+
+            const container = document.getElementById('chat-messages-container');
+            container.appendChild(msgDiv);
+            
+            const mainScroll = document.querySelector('main');
+            mainScroll.scrollTop = mainScroll.scrollHeight;
+
+            if (save) {
+                const history = JSON.parse(localStorage.getItem('codify_chat_history') || '[]');
+                history.push({ text, sender, timestamp: new Date().toISOString() });
+                localStorage.setItem('codify_chat_history', JSON.stringify(history));
+            }
+        }
+
+        function clearGlobalMemory() {
+            if (confirm('Are you sure you want to clear all AI memory?')) {
+                localStorage.removeItem('codify_memory');
+                localStorage.removeItem('codify_chat_history');
+                localStorage.removeItem('codify_projects');
+                location.reload();
+            }
+        }
+
+        // Neural Architect & Command Logic
+        const COMMAND_SUITE = {
+            'help': () => 'Available commands: [clear, ls, mkdir, touch, ai --analyze, project --export, system --status]',
+            'ls': () => {
+                const activeId = localStorage.getItem('codify_active_project');
+                const projects = JSON.parse(localStorage.getItem('codify_projects') || '[]');
+                const project = projects.find(p => p.id === activeId);
+                return project ? project.files.map(f => f.name).join('  ') : 'Error: No active project context.';
+            },
+            'system --status': () => `OS: CodifyMAX v4\nNode: Algerian Root 🇩🇿\nNeural Link: Stable\nSynaptic Memory: ${JSON.stringify(CODIFY_STATE.memory.skills)}`,
+            'clear': () => { clearTerminal(); return null; }
+        };
+
+        function handleTerminalCommand(cmd) {
+            const input = cmd.trim().toLowerCase();
+            terminalLog(`<span class="text-indigo-400">majhoul@codify:~$</span> ${cmd}`, 'gray');
+            
+            if (COMMAND_SUITE[input]) {
+                const result = COMMAND_SUITE[input]();
+                if (result) terminalLog(result, 'emerald');
+            } else if (input.startsWith('ai ')) {
+                terminalLog(`[AI] Processing neural query: ${input.substring(3)}...`, 'indigo');
+                setTimeout(() => terminalLog(`[AI] Analysis complete. Check neural nodes for updates.`, 'emerald'), 1000);
+            } else {
+                terminalLog(`sh: command not found: ${cmd}`, 'red');
+            }
+        }
+
+        function switchLibraryTab(tab) {
+            const tabs = ['files', 'nodes', 'assets'];
+            tabs.forEach(t => {
+                document.getElementById(`lib-${t}`).classList.add('hidden');
+                document.getElementById(`tab-${t}`).classList.remove('text-white', 'border-b-2', 'border-indigo-500');
+                document.getElementById(`tab-${t}`).classList.add('text-gray-500');
+            });
+            document.getElementById(`lib-${tab}`).classList.remove('hidden');
+            document.getElementById(`tab-${tab}`).classList.add('text-white', 'border-b-2', 'border-indigo-500');
+            document.getElementById(`tab-${tab}`).classList.remove('text-gray-500');
+            
+            if (tab === 'assets') findResources();
+        }
+
+        function findResources() {
+            const output = document.getElementById('resource-output');
+            const categories = {
+                'Design': [
+                    { name: 'Dribbble', url: 'dribbble.com', desc: 'Design Inspiration' },
+                    { name: 'Behance', url: 'behance.net', desc: 'Creative Portfolios' },
+                    { name: 'Figma Community', url: 'figma.com/community', desc: 'UI Kits & Plugins' },
+                    { name: 'LottieFiles', url: 'lottiefiles.com', desc: 'Lightweight Animations' }
+                ],
+                'Icons': [
+                    { name: 'Font Awesome', url: 'fontawesome.com', desc: 'The classic icon set' },
+                    { name: 'Lucide Icons', url: 'lucide.dev', desc: 'Beautifully simple icons' },
+                    { name: 'Tabler Icons', url: 'tabler-icons.io', desc: '3200+ Open source icons' },
+                    { name: 'Phosphor', url: 'phosphoricons.com', desc: 'Flexible icon family' }
+                ],
+                'Coding': [
+                    { name: 'Stack Overflow', url: 'stackoverflow.com', desc: 'Dev Q&A' },
+                    { name: 'MDN Web Docs', url: 'developer.mozilla.org', desc: 'Web Standards' },
+                    { name: 'DevDocs', url: 'devdocs.io', desc: 'API Documentation' },
+                    { name: 'GitHub', url: 'github.com', desc: 'Source Control' }
+                ],
+                'Game Dev': [
+                    { name: 'Itch.io', url: 'itch.io', desc: 'Game Assets & Games' },
+                    { name: 'Unity Asset Store', url: 'assetstore.unity.com', desc: 'Unity Engine Assets' },
+                    { name: 'Kenney Assets', url: 'kenney.nl', desc: 'Thousands of free assets' },
+                    { name: 'GameDev Market', url: 'gamedevmarket.net', desc: 'High-quality game assets' }
+                ]
+            };
+
+            output.innerHTML = Object.entries(categories).map(([cat, links]) => `
+                <div class="mb-4">
+                    <h5 class="text-[9px] font-black text-gray-600 uppercase tracking-widest mb-2">${cat}</h5>
+                    <div class="space-y-1.5">
+                        ${links.map(l => `
+                            <a href="https://${l.url}" target="_blank" class="block bg-base p-2 rounded-lg border border-white/5 hover:border-indigo-500/50 transition-all group">
+                                <div class="flex justify-between items-center mb-0.5">
+                                    <span class="text-[10px] font-bold text-white group-hover:text-indigo-400">${l.name}</span>
+                                    <i class="fas fa-external-link-alt text-[8px] text-gray-600"></i>
+                                </div>
+                                <p class="text-[8px] text-gray-500">${l.desc}</p>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function addNotification(msg) {
+            // Re-using chat for notifications in this new style
+            addMessage(`🔔 **Notification**: ${msg}`, 'ai');
+        }
+
+        function getAIResponse(input) {
+            const lowerInput = input.toLowerCase();
+            const tone = CODIFY_STATE.memory.tone;
+            const activeProjectId = localStorage.getItem('codify_active_project');
+            const projects = JSON.parse(localStorage.getItem('codify_projects') || '[]');
+            const activeProject = projects.find(p => p.id === activeProjectId);
+            
+            // Knowledge Base: Real AI Info & Localized Node
+            if (lowerInput.includes('who are you') || lowerInput.includes('work')) {
+                return `I am **CODIFY-V4**, a specialized Neural Agent synchronized with the **Algerian Root Node** 🇩🇿. I don't just generate code; I architect systems by analyzing design patterns, logic efficiency, and user intent. My neural engine uses **Synaptic Load** to adapt to your specific building style, Majhoul.`;
+            }
+
+            if (lowerInput.includes('algeria') || lowerInput.includes('dz')) {
+                return `Tahia el Djazair! 🇩🇿 Working with you from the 16th node. Let's build something that makes our community proud. Ready for instructions, Architect.`;
+            }
+
+            if (lowerInput.includes('status') || lowerInput.includes('neural')) {
+                return `Neural link is **STABLE**. Synaptic load is at **${Math.min(CODIFY_STATE.memory.interactions * 5, 100)}%**. I have mapped **${Object.keys(CODIFY_STATE.memory.projects || {}).length}** active project contexts and **${CODIFY_STATE.memory.preferences.length}** design preferences.`;
+            }
+
+            // Powerful Context-Aware Responses
+            if (activeProject) {
+                if (lowerInput.includes('files') || lowerInput.includes('project')) {
+                    const fileNames = activeProject.files.map(f => f.name).join(', ');
+                    return `Analyzing project context: **${activeProject.name}**. I've identified these logic nodes: ${fileNames}. My architectural analysis suggests focusing on the **${activeProject.category}** logic first.`;
+                }
+
+                if (lowerInput.includes('code') || lowerInput.includes('logic')) {
+                    const isPython = activeProject.category === 'python' || lowerInput.includes('python');
+                    if (isPython) {
+                        return `For your Python architecture in **${activeProject.name}**, I'm applying PEP8 standards and optimizing for O(n) complexity. Here's a high-performance snippet:\n\n\`\`\`python\nimport sys\n\nclass NeuralProcessor:\n    def __init__(self, node_id="Algeria-16"):\n        self.node = node_id\n        print(f"Processor online: {self.node}")\n\ndef main():\n    # System logic for ${activeProject.name}\n    processor = NeuralProcessor()\n\nif __name__ == "__main__":\n    main()\n\`\`\``;
+                    }
+                    return `Detected **${activeProject.category}** context. I'm ready to generate a clean, modular component with Tailwind CSS integration. Shall we proceed with the UI layer?`;
+                }
+            } else {
+                if (lowerInput.includes('file') || lowerInput.includes('code')) {
+                    return `Neural context missing. Please **select a project** or **create a new evolution** in the sidebar so I can synchronize with your codebase.`;
+                }
+            }
+
+            const responses = [
+                "Logic confirmed. I can implement that architecture in Python or JS.",
+                "Analyzing request. Since we prefer clean design, I'll optimize for a minimalist UX.",
+                "Synaptic memory updated. I'm learning your workflow patterns.",
+                "Let's optimize this logic node to reduce synaptic load. Ready to generate code."
+            ];
+
+            const response = responses[Math.floor(Math.random() * responses.length)];
+            
+            if (tone === "majhoul-partner") {
+                return `Listen Majhoul, ${response.toLowerCase()} Let's make this the best build yet. 🚀`;
+            }
+            if (tone === "friendly-expert") {
+                return `Hey Architect! ${response} I'm here to help you nail this build.`;
+            }
+            return response;
+        }
+
+        const chatInput = document.getElementById('chat-input');
+        
+        window.onload = () => {
+            const history = JSON.parse(localStorage.getItem('codify_chat_history') || '[]');
+            CODIFY_STATE.updateUI();
+            renderProjects();
+            
+            const activeId = localStorage.getItem('codify_active_project');
+            if (activeId && activeId !== 'none') {
+                switchProject(activeId);
+                if (history.length > 0) {
+                    history.forEach(msg => addMessage(msg.text, msg.sender, false));
+                }
+            }
+        };
+
+        function useSuggestion(text) {
+            const welcomeInput = document.getElementById('chat-input-welcome');
+            const workspaceInput = document.getElementById('chat-input-workspace');
+            
+            if (!document.getElementById('workspace-welcome').classList.contains('hidden')) {
+                welcomeInput.value = `Initialize a new ${text} evolution.`;
+                sendMessage('welcome');
+            } else {
+                workspaceInput.value = `Execute ${text} module.`;
+                sendMessage('workspace');
+            }
+        }
+
+        function clearTerminal() {
+            document.getElementById('terminal-output').innerHTML = '<div class="text-gray-600">Terminal buffer cleared.</div>';
+        }
+
+        function toggleTerminal() {
+            const panel = document.getElementById('terminal-panel');
+            const icon = document.getElementById('terminal-toggle-icon');
+            if (panel.classList.contains('h-48')) {
+                panel.classList.remove('h-48');
+                panel.classList.add('h-8');
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-up');
+            } else {
+                panel.classList.remove('h-8');
+                panel.classList.add('h-48');
+                icon.classList.remove('fa-chevron-up');
+                icon.classList.add('fa-chevron-down');
+            }
+        }
+
+        // Terminal Input Handling
+        const termInput = document.getElementById('terminal-input');
+        if (termInput) {
+            termInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter') {
+                    const cmd = termInput.value;
+                    handleTerminalCommand(cmd);
+                    termInput.value = '';
+                }
+            });
+        }
+
+        // Enter key to send message
+        document.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                const welcomeInput = document.getElementById('chat-input-welcome');
+                const workspaceInput = document.getElementById('chat-input-workspace');
+                
+                if (document.activeElement === welcomeInput) {
+                    e.preventDefault();
+                    sendMessage('welcome');
+                } else if (document.activeElement === workspaceInput) {
+                    e.preventDefault();
+                    sendMessage('workspace');
+                }
+            }
+        });
+    </script>
+</body>
+</html>
